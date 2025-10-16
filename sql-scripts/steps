@@ -34,3 +34,4 @@ with (
 ---validating the number columns and count of nows and 
 SELECT * FROM bronze.crm_cust_info;
 SELECT COUNT(*) FROM bronze.crm_cust_info;
+ 
