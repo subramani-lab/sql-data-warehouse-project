@@ -156,6 +156,77 @@ c.last_name
 having sum(f.sales) <10000
 order by total_revenue desc
 
+use datawarehouse
+--Ranking Analysis----
+--Which 5 Product generate the highest revenue?
+select top 5
+pd.product_name,
+sum(f.sales) as total_revenue
+from gold.fact_sales f
+left join gold.dim_products pd
+on f.product_key = pd.product_key
+group by pd.product_name 
+order by total_revenue desc
+
+----Bottom 5 products 
+select top 5
+pd.product_name,
+sum(f.sales) as total_revenue
+from gold.fact_sales f
+left join gold.dim_products pd
+on f.product_key = pd.product_key
+group by pd.product_name 
+order by total_revenue 
+
+--Using window functions
+select * 
+from (
+	select 
+	pd.product_name,
+	sum(f.sales) as total_revenue,
+	dense_rank() over (order by sum(f.sales) desc) as prod_rank
+	from gold.fact_sales f
+	left join gold.dim_products pd
+	on f.product_key = pd.product_key
+	group by pd.product_name ) t
+where prod_rank <=5
+
+--Find the top 10 csutomers who as generated the hgiest revenue
+
+select * from(
+	select
+	c.customer_key,
+	c.first_name,
+	c.last_name,
+	sum(f.sales) as Total_revenue,
+	DENSE_RANK() over (order by sum(f.sales) desc ) as top_cusomers
+	from gold.fact_sales f
+	left join gold.dim_customers c
+	on f.customer_key = c.customer_key
+	group by 
+	c.customer_key,
+	c.first_name,
+	c.last_name) t
+where top_cusomers <= 10
+
+--The 3 customer with the fewest oders placed
+
+select top 3
+c.customer_key,
+c.first_name,
+c.last_name, 
+count(distinct f.order_number) total_orders
+from gold.fact_sales f
+left join gold.dim_customers c
+on f.customer_key = c.customer_key
+group by 
+c.customer_key,
+c.first_name,
+c.last_name
+order by total_orders
+
+
+
 
 
 
